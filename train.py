@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import torch
 from torch import nn
@@ -8,9 +9,13 @@ from model import CharRNN
 from utils import *
 from visualize import *
 
-
 # read text and make character conversion utilities
-with open('data/shakespeare.txt', 'r') as f:
+try:
+    filename = sys.argv[1]
+except:
+    filename = 'shakespeare'
+
+with open(f'data/{filename}', 'r') as f:
     text = f.read()
 chars = tuple(set(text))
 int2char = dict(enumerate(chars))
@@ -138,7 +143,7 @@ box('Network Architecture')
 print(net)
 
 # train the model
-box('Training', color='yellow')
+box(f'Training on {filename.upper()}', color='yellow')
 train(net, encoded_text, epochs=60, batch_size=128, seq_length=100, lr=0.001, vis_iter=20)
 box('Results', color='green')
 print(generate_text(net, 1000, first_chars='A', top_k=5))
