@@ -28,7 +28,7 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # training method
 def train(net, data, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, val_frac=0.1, vis_iter=10, save_iter=10):
-    pathlib.Path('saved_models').mkdir()
+    pathlib.Path('saved_models').mkdir(exist_ok=True)
 
     net.train()
 
@@ -46,7 +46,7 @@ def train(net, data, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, 
     for e in range(epochs):
         h = net.init_hidden(batch_size)
 
-        for x, y in get_batches(data, batch_size, seq_length):
+        for x, y, epoch_part, parts_per_epoch in get_batches(data, batch_size, seq_length):
             counter += 1
 
             # One-hot encode our data and make them Torch tensors
@@ -66,12 +66,15 @@ def train(net, data, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, 
             nn.utils.clip_grad_norm_(net.parameters(), clip)
             opt.step()
 
+            # print epoch progress
+            progress(epoch_part, parts_per_epoch, f'Epoch {e+1}/{epochs}')
+
             # print loss stats occasionally
             if counter % vis_iter == vis_iter - 1:
                 val_h = net.init_hidden(batch_size)
                 mean_val_loss = None
                 net.eval()
-                for x, y in get_batches(val_data, batch_size, seq_length):
+                for x, y, _, _ in get_batches(val_data, batch_size, seq_length):
                     x = one_hot_encode(x, n_chars)
                     x, y = torch.from_numpy(x), torch.from_numpy(y)
                     val_h = tuple([each.data for each in val_h])
@@ -88,7 +91,6 @@ def train(net, data, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, 
 
                 plot(counter, loss, 'Loss', 'Training', '#FA5784')                                                      # PROGRESS BAR FOR % DONE W/ EPOCH
                 plot(counter, mean_val_loss, 'Loss', 'Validation', '#FFAED4')
-                progress(e, epochs, 'Epochs')
 
             # save model occasionally
             if e % save_iter == save_iter - 1:
@@ -141,12 +143,13 @@ def generate_text(net, size, first_chars='The', top_k=None):
     return ''.join(chars)
 
 
-net = CharRNN(chars, n_hidden=512, n_layers=2)
+# net = CharRNN(chars, n_hidden=512, n_layers=2)
+net = CharRNN(chars, n_hidden=64, n_layers=2)
 box('Network Architecture')
 print(net)
 
 # train the model
 box(f'Training on {filename.upper()}', color='yellow')
-train(net, encoded_text, epochs=60, batch_size=128, seq_length=100, lr=0.001, vis_iter=20)
+train(net, encoded_text, epochs=40, batch_size=128, seq_length=100, lr=0.001, vis_iter=20)
 box('Results', color='green')
 print(generate_text(net, 1000, first_chars='A', top_k=5))

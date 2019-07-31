@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def one_hot_encode(arr, n_labels):
     one_hot = np.zeros((np.multiply(*arr.shape), n_labels), dtype=np.float32)
@@ -26,14 +27,20 @@ def get_batches(arr, batch_size, seq_length):
     # Reshape into batch_size rows
     arr = arr.reshape((batch_size, -1))
 
+    iters = math.ceil(arr.shape[1] / seq_length)
+
+    i = -1
     # iterate through the array, one sequence at a time
     for n in range(0, arr.shape[1], seq_length):
+        i += 1
+
         # The features
         x = arr[:, n:n+seq_length]
         # The targets, shifted by one
         y = np.zeros_like(x)
+
         try:
             y[:, :-1], y[:, -1] = x[:, 1:], arr[:, n+seq_length]
         except IndexError:
             y[:, :-1], y[:, -1] = x[:, 1:], arr[:, 0]
-        yield x, y
+        yield x, y, i, iters
