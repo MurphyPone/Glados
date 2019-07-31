@@ -144,13 +144,12 @@ def generate_text(net, size, first_chars='The', top_k=None):
     return ''.join(chars)
 
 
-# net = CharRNN(chars, n_hidden=512, n_layers=2)
-net = CharRNN(chars, n_hidden=10, n_layers=2)
+net = CharRNN(chars, n_hidden=512, n_layers=2)
 box('Network Architecture')
 print(net)
 
 # train the model
 box(f'Training on {filename.upper()}', color='yellow')
-train(net, encoded_text, epochs=2, batch_size=128, seq_length=100, lr=0.001, vis_iter=20)
+train(net, encoded_text, epochs=60, batch_size=128, seq_length=100, lr=0.001, vis_iter=20)
 box('Results', color='green')
 print(generate_text(net, 1000, first_chars='A', top_k=5))
