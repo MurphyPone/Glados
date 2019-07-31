@@ -1,4 +1,5 @@
 import sys
+import pathlib
 import numpy as np
 import torch
 from torch import nn
@@ -27,6 +28,8 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # training method
 def train(net, data, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, val_frac=0.1, vis_iter=10, save_iter=10):
+    pathlib.Path('saved_models').mkdir()
+
     net.train()
 
     opt = torch.optim.Adam(net.parameters(), lr=lr)
