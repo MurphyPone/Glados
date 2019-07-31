@@ -68,6 +68,7 @@ def train(net, data, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, 
 
             # print epoch progress
             progress(epoch_part, parts_per_epoch, f'Epoch {e+1}/{epochs}')
+            if e == epochs - 1 and epoch_part == parts_per_epoch - 1: print()
 
             # print loss stats occasionally
             if counter % vis_iter == vis_iter - 1:
@@ -144,12 +145,12 @@ def generate_text(net, size, first_chars='The', top_k=None):
 
 
 # net = CharRNN(chars, n_hidden=512, n_layers=2)
-net = CharRNN(chars, n_hidden=64, n_layers=2)
+net = CharRNN(chars, n_hidden=10, n_layers=2)
 box('Network Architecture')
 print(net)
 
 # train the model
 box(f'Training on {filename.upper()}', color='yellow')
-train(net, encoded_text, epochs=40, batch_size=128, seq_length=100, lr=0.001, vis_iter=20)
+train(net, encoded_text, epochs=2, batch_size=128, seq_length=100, lr=0.001, vis_iter=20)
 box('Results', color='green')
 print(generate_text(net, 1000, first_chars='A', top_k=5))

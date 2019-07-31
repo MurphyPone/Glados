@@ -101,9 +101,9 @@ def progress(i, total, action):
 
     color = get_color(ratio)
 
-    sys.stdout.write('\r%s |%s| ' % (action.ljust(30), bar) + rgb_colored('{0:.0f}%'.format(percent), color))
+    sys.stdout.write('\r%s |%s| ' % (action.ljust(30), bar) + rgb_colored('{0:.0f}%'.format(percent), color) + ' ')
 
-    if i == total:
-        sys.stdout.write('\n')
+    # if i == total:
+    #     sys.stdout.write('\n')
 
     sys.stdout.flush()
