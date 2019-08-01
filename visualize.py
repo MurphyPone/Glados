@@ -81,8 +81,6 @@ def box(text, color='cyan'):
     bottom = '└' + ('─' * l) + '┘'
     print(f'\n{top}\n{mid}\n{bottom}')
 
-
-
 def get_color(ratio):
     r = int(min(max(500 * (1 - ratio), 0), 255))
     g = int(min(max(500 * ratio, 0), 255))

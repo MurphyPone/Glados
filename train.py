@@ -14,7 +14,7 @@ from visualize import *
 try:
     filename = sys.argv[1]
 except:
-    filename = 'shakespeare'
+    filename = 'input'
 
 with open(f'data/{filename}', 'r') as f:
     text = f.read()
@@ -89,8 +89,16 @@ def train(net, data, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, 
 
                 net.train()
 
-                plot(counter, loss, 'Loss', 'Training', '#FA5784')                                                      # PROGRESS BAR FOR % DONE W/ EPOCH
+                plot(counter, loss, 'Loss', 'Training', '#FA5784')                                  # PROGRESS BAR FOR % DONE W/ EPOCH
                 plot(counter, mean_val_loss, 'Loss', 'Validation', '#FFAED4')
+
+                acc = 100 - (abs(mean_val_loss - loss.item())/mean_val_loss * 100)
+                plot(counter, acc, 'Accuracy', 'Accuracy', '#3d068b')
+
+                smpl = generate_text(net, 50, first_chars='The meaning of life is: ', top_k=5)
+                print('\n\nmean loss: ', mean_val_loss, '\nloss: ', loss.item(), '\nacc: ', abs(mean_val_loss - loss.item())/abs(mean_val_loss) * 100)
+                print('\n' + smpl + '\n') # print sample
+
 
             # save model occasionally
             if e % save_iter == save_iter - 1:
