@@ -1,35 +1,30 @@
+import torch
 import torch.nn as nn
 
-class CharRNN(nn.Module):
-    def __init__(self, tokens, n_hidden=256, n_layers=2, drop_prob=0.5):
+from utils import get_device
+
+class RNN(nn.Module):
+    def __init__(self, n_chars, n_hidden=512, n_layers=2, drop_prob=0.5):
         super().__init__()
 
-        self.chars = tokens
+        # params
         self.n_layers = n_layers
         self.n_hidden = n_hidden
+        self.device = get_device()
 
         # network layers
-        self.lstm = nn.LSTM(len(self.chars), n_hidden, n_layers, dropout=drop_prob, batch_first=True)
+        self.lstm = nn.LSTM(n_chars, n_hidden, n_layers, dropout=drop_prob, batch_first=True)
         self.dropout = nn.Dropout(drop_prob)
-        self.fc = nn.Linear(n_hidden, len(self.chars))
+        self.linear = nn.Linear(n_hidden, n_chars)
 
 
     def forward(self, x, hidden):
-        r_output, hidden = self.lstm(x, hidden)
-        out = self.dropout(r_output)
-        out = out.contiguous().view(-1, self.n_hidden)
-        out = self.fc(out)
+        out, hidden = self.lstm(x, hidden)
+        out = self.dropout(out)
+        out = self.linear(out)
         return out, hidden
 
 
-    def init_hidden(self, batch_size, train_on_gpu=False):
-        weight = next(self.parameters()).data
-
-        if (train_on_gpu):
-            hidden = (weight.new(self.n_layers, batch_size, self.n_hidden).zero_().cuda(),
-                      weight.new(self.n_layers, batch_size, self.n_hidden).zero_().cuda())
-        else:
-            hidden = (weight.new(self.n_layers, batch_size, self.n_hidden).zero_(),
-                      weight.new(self.n_layers, batch_size, self.n_hidden).zero_())
-
-        return hidden
+    def blank_hidden(self, batch_size=1):
+        return (torch.zeros(self.n_layers, batch_size, self.n_hidden).to(self.device),
+                torch.zeros(self.n_layers, batch_size, self.n_hidden).to(self.device))
